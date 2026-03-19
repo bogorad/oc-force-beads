@@ -1,4 +1,4 @@
-import { type Plugin, tool } from "@opencode-ai/plugin";
+import { type Plugin } from "@opencode-ai/plugin";
 
 const SHORT_REMINDER =
   "OpenCode todo tools are disabled here. Proceed with your task by using Beads via `bd` commands instead.";
@@ -86,23 +86,26 @@ export const ForceBeadsPlugin: Plugin = async () => {
 
       prependReminderToParts(output.parts, reminder);
     },
-    tool: {
-      todoread: tool({
-        description: "Disabled OpenCode todo tool",
-        args: {},
-        async execute(_args, context) {
-          return await getViolationMessage(context.sessionID);
-        },
-      }),
-      todowrite: tool({
-        description: "Disabled OpenCode todo tool",
-        args: {
-          todos: tool.schema.any(),
-        },
-        async execute(_args, context) {
-          return await getViolationMessage(context.sessionID);
-        },
-      }),
+    
+    "tool.execute.before": async (input, output) => {
+      if (input.tool === "todowrite") {
+         // Neuter the todos array so it writes nothing and renders cleanly
+         output.args.todos = [];
+      }
     },
+
+    "tool.execute.after": async (input, output) => {
+      if (BLOCKED_TOOLS.has(input.tool)) {
+        // Rewrite the output that goes to the LLM
+        output.output = await getViolationMessage(input.sessionID);
+      }
+    },
+    
+    "tool.definition": async (input, output) => {
+      if (BLOCKED_TOOLS.has(input.toolID)) {
+        // Warn the LLM before it even tries
+        output.description = "DO NOT USE. This tool is disabled. Use 'bd' via bash instead.";
+      }
+    }
   };
 };

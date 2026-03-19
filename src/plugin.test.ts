@@ -30,34 +30,6 @@ const pluginInput = {
   $: {} as never,
 };
 
-async function runTool(input: {
-  tool: string;
-  sessionID: string;
-  args: any;
-}): Promise<string | undefined> {
-  const hooks = await ForceBeadsPlugin(pluginInput);
-  
-  if (!hooks.tool || !hooks.tool[input.tool]) {
-    return undefined;
-  }
-
-  const toolObj = hooks.tool[input.tool];
-  if (!toolObj) {
-    return undefined;
-  }
-
-  return toolObj.execute(input.args, {
-    sessionID: input.sessionID,
-    messageID: `${input.sessionID}-message`,
-    agent: "general",
-    directory: "/tmp",
-    worktree: "/tmp",
-    abort: new AbortController().signal,
-    metadata: () => {},
-    ask: async () => {},
-  });
-}
-
 async function runCommandBeforeHook(input: {
   sessionID: string;
   text: string;
@@ -99,56 +71,55 @@ async function runCommandBeforeHook(input: {
   return part.text;
 }
 
-async function getErrorMessage(input: {
-  tool: string;
-  sessionID: string;
-  args: any;
-}): Promise<string> {
-  const result = await runTool(input);
-  if (result === undefined) {
-    throw new Error("Tool did not return a value");
+test("first blocked todo call intercepts output and neuters args", async () => {
+  const hooks = await ForceBeadsPlugin(pluginInput);
+  
+  const beforeHook = hooks["tool.execute.before"];
+  const afterHook = hooks["tool.execute.after"];
+  const defHook = hooks["tool.definition"];
+  
+  if (!beforeHook || !afterHook || !defHook) {
+    throw new Error("Missing required hooks");
   }
-  return result;
-}
 
-test("first blocked todo call returns a short prefix plus the full Beads policy", async () => {
-  const message = await getErrorMessage({
-    tool: "todoread",
-    sessionID: "smoke-full-policy",
-    args: {},
-  });
+  const beforeOutput = { args: { todos: ["hello"] } };
+  await beforeHook({ tool: "todowrite", sessionID: "smoke-full-policy", callID: "1" }, beforeOutput);
+  expect(beforeOutput.args.todos).toEqual([]);
 
-  expect(message).toBe(prefixedBeadsPolicy);
+  const afterOutput = { title: "title", output: "success", metadata: {} };
+  await afterHook({ tool: "todowrite", sessionID: "smoke-full-policy", callID: "1", args: {} }, afterOutput);
+  expect(afterOutput.output).toBe(prefixedBeadsPolicy);
+  
+  const defOutput = { description: "orig", parameters: {} };
+  await defHook({ toolID: "todowrite" }, defOutput);
+  expect(defOutput.description).toContain("DO NOT USE");
 });
 
 test("later blocked calls in the same session return the short reminder", async () => {
+  const hooks = await ForceBeadsPlugin(pluginInput);
+  const afterHook = hooks["tool.execute.after"]!;
+  
   const sessionID = "smoke-short-reminder";
 
-  const firstMessage = await getErrorMessage({
-    tool: "todowrite",
-    sessionID,
-    args: {},
-  });
-  const secondMessage = await getErrorMessage({
-    tool: "todoread",
-    sessionID,
-    args: {},
-  });
+  const firstOutput = { title: "title", output: "success", metadata: {} };
+  await afterHook({ tool: "todowrite", sessionID, callID: "1", args: {} }, firstOutput);
+  
+  const secondOutput = { title: "title", output: "success", metadata: {} };
+  await afterHook({ tool: "todoread", sessionID, callID: "2", args: {} }, secondOutput);
 
-  expect(firstMessage).toBe(prefixedBeadsPolicy);
-  expect(secondMessage).toBe(SHORT_REMINDER);
+  expect(firstOutput.output).toBe(prefixedBeadsPolicy);
+  expect(secondOutput.output).toBe(SHORT_REMINDER);
 });
 
 test("task calls are not blocked", async () => {
-  await expect(
-    runTool({
-      tool: "task",
-      sessionID: "smoke-task-pass-through",
-      args: {
-        subagent_type: "general",
-      },
-    }),
-  ).resolves.toBeUndefined();
+  const hooks = await ForceBeadsPlugin(pluginInput);
+  const afterHook = hooks["tool.execute.after"]!;
+  
+  const output = { title: "title", output: "success", metadata: {} };
+  await afterHook({ tool: "task", sessionID: "task-session", callID: "1", args: {} }, output);
+  
+  // Ensure it didn't overwrite the output
+  expect(output.output).toBe("success");
 });
 
 test("first command in a session gets the full Beads reminder", async () => {
