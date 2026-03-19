@@ -1,7 +1,7 @@
 import { type Plugin } from "@opencode-ai/plugin";
 
 const SHORT_REMINDER =
-  "OpenCode todo tools are disabled here. Proceed with your task by using Beads via `bd` commands instead.";
+  "OpenCode todo tools are disabled here. You MUST immediately use the `bd` command via the bash tool to recreate your intended task tracking in Beads. Do not skip this step or ask for permission. Just do it.";
 const FULL_POLICY_PREFIX = `${SHORT_REMINDER}\n\n`;
 const SHORT_PROMPT_REMINDER = `<system-reminder>\n${SHORT_REMINDER} Start with \`bd prime\` if you need the workflow summary.\n</system-reminder>\n\n`;
 const PRINT_BEADS_COMMAND = ["bd", "setup", "opencode", "--print"] as const;
