@@ -1,6 +1,6 @@
 {
   "name": "oc-force-beads",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "type": "module",
   "description": "OpenCode plugin that blocks native todo tooling and redirects agents to Beads.",
   "license": "MIT",
