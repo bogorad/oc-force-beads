@@ -2,8 +2,9 @@ node_modules/
 .opencode/
 .direnv/
 result
-.DS_Store
+plugin-test.log
 
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+
