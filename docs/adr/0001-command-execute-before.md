@@ -15,15 +15,18 @@ The plugin should not depend on a special Beads-only task agent. It should stay 
 
 ## Decision
 
-Use the `command.execute.before` hook and override native tools using tool definitions.
+Use the `command.execute.before` hook and intercept native tools using lifecycle hooks.
 
 Implementation rules:
 
 1. Inject a Beads reminder before each command the model executes.
-2. Include the full `bd setup opencode --print` guidance once per session, then use only a short reminder on later commands.
-3. Block native `todoread` and `todowrite` by supplying custom implementations that return the reminder string directly.
+2. Include the full `bd setup opencode --print` guidance once per session, then use only a short reminder on later commands. The short reminder is a strict command to immediately use `bd`.
+3. Block native `todoread` and `todowrite` by:
+   - Injecting a "DO NOT USE" message via `tool.definition` to deter the LLM.
+   - Neuter arguments in `tool.execute.before` (e.g. empty the `todos` array) so nothing writes to disk and the TUI/Desktop avoids rendering empty ghost checklists.
+   - Return the Beads instructions gracefully via `tool.execute.after` so the agent can learn and pivot.
 4. Leave normal `task` execution alone.
-5. On overridden todo calls after the full session guidance has already been shown, return only the short reminder.
+5. On intercepted todo calls after the full session guidance has already been shown, return only the short reminder.
 
 ## Consequences
 
