@@ -1,0 +1,1 @@
+When work on this repo is done, verify the tool path first (`command -v bun`). If Bun is missing from the plain shell, use `nix develop --command ...`. Run dependency install if needed, then run `bun run typecheck` through the plain shell or dev shell. Check `git status` at the end. Do not skip ADR and README updates when behavior changes.

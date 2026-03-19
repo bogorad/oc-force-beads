@@ -1,0 +1,1 @@
+`oc-force-beads` is a small OpenCode plugin repo. Its purpose is to inject a Beads task-management policy before each command by using the OpenCode `command.execute.before` hook. The repo is intended to stay small and focused: one plugin entry file, one ADR explaining the hook choice, a README, and a Linux-only Nix dev shell for Bun-based development.

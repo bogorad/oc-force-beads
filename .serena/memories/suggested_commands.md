@@ -1,0 +1,7 @@
+- `command -v bun` - check whether Bun is on PATH in the plain shell.
+- `nix develop --command bun --help` - verify Bun inside the local dev shell.
+- `nix develop --command bun install` - install dependencies when Bun is not on PATH.
+- `nix develop --command bun run typecheck` - run the main verification step.
+- `git status --short` - inspect repo state.
+- `git init` - initialize the repo after scaffolding.
+- `git add -A` - stage all created files.

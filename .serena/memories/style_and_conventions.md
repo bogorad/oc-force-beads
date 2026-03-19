@@ -1,0 +1,1 @@
+Keep the code small and direct. Use TypeScript with ESM. Prefer one-purpose helpers over abstractions. Match OpenCode plugin conventions: export a named `Plugin`, keep the policy text explicit, and handle both normal command parts and `subtask.prompt` injection. Documentation should be short and plain English. ADRs should record context, decision, alternatives, and consequences.
