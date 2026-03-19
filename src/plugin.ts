@@ -100,12 +100,5 @@ export const ForceBeadsPlugin: Plugin = async () => {
         output.output = await getViolationMessage(input.sessionID);
       }
     },
-    
-    "tool.definition": async (input, output) => {
-      if (BLOCKED_TOOLS.has(input.toolID)) {
-        // Warn the LLM before it even tries
-        output.description = "DO NOT USE. This tool is disabled. Use 'bd' via bash instead.";
-      }
-    }
   };
 };

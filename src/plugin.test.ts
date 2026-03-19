@@ -76,9 +76,8 @@ test("first blocked todo call intercepts output and neuters args", async () => {
   
   const beforeHook = hooks["tool.execute.before"];
   const afterHook = hooks["tool.execute.after"];
-  const defHook = hooks["tool.definition"];
   
-  if (!beforeHook || !afterHook || !defHook) {
+  if (!beforeHook || !afterHook) {
     throw new Error("Missing required hooks");
   }
 
@@ -89,10 +88,6 @@ test("first blocked todo call intercepts output and neuters args", async () => {
   const afterOutput = { title: "title", output: "success", metadata: {} };
   await afterHook({ tool: "todowrite", sessionID: "smoke-full-policy", callID: "1", args: {} }, afterOutput);
   expect(afterOutput.output).toBe(prefixedBeadsPolicy);
-  
-  const defOutput = { description: "orig", parameters: {} };
-  await defHook({ toolID: "todowrite" }, defOutput);
-  expect(defOutput.description).toContain("DO NOT USE");
 });
 
 test("later blocked calls in the same session return the short reminder", async () => {
