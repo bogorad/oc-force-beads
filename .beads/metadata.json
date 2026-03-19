@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "oc_force_beads",
+  "project_id": "b3c105c6-81f5-460d-bf45-8e337f2856a2"
+}
