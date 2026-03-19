@@ -1,5 +1,5 @@
 node_modules/
-.opencode/node_modules/
+.opencode/
 .direnv/
 result
 .DS_Store
