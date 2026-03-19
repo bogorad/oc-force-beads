@@ -1,4 +1,4 @@
-import type { Plugin } from "@opencode-ai/plugin";
+import { type Plugin, tool } from "@opencode-ai/plugin";
 
 const SHORT_REMINDER =
   "OpenCode todo tools are disabled here. Proceed with your task by using Beads via `bd` commands instead.";
@@ -86,12 +86,23 @@ export const ForceBeadsPlugin: Plugin = async () => {
 
       prependReminderToParts(output.parts, reminder);
     },
-    "tool.execute.before": async (input) => {
-      if (!BLOCKED_TOOLS.has(input.tool)) {
-        return;
-      }
-
-      throw new Error(await getViolationMessage(input.sessionID));
+    tool: {
+      todoread: tool({
+        description: "Disabled OpenCode todo tool",
+        args: {},
+        async execute(_args, context) {
+          return await getViolationMessage(context.sessionID);
+        },
+      }),
+      todowrite: tool({
+        description: "Disabled OpenCode todo tool",
+        args: {
+          todos: tool.schema.any(),
+        },
+        async execute(_args, context) {
+          return await getViolationMessage(context.sessionID);
+        },
+      }),
     },
   };
 };

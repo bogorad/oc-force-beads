@@ -14,7 +14,7 @@
 
 ## Why this hook
 
-This plugin uses `command.execute.before` to steer the model before each command, and `tool.execute.before` to keep a hard doorstop on blocked todo calls at runtime.
+This plugin uses `command.execute.before` to steer the model before each command, and provides custom overrides for `todoread` and `todowrite` to gracefully intercept blocked todo calls at runtime without breaking the agent loop.
 
 The plugin loads the first denial message from `bd setup opencode --print`, so `bd` must be available on `PATH` where OpenCode runs.
 

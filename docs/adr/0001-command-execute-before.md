@@ -15,19 +15,19 @@ The plugin should not depend on a special Beads-only task agent. It should stay 
 
 ## Decision
 
-Use the `command.execute.before` and `tool.execute.before` hooks.
+Use the `command.execute.before` hook and override native tools using tool definitions.
 
 Implementation rules:
 
 1. Inject a Beads reminder before each command the model executes.
 2. Include the full `bd setup opencode --print` guidance once per session, then use only a short reminder on later commands.
-3. Block native `todoread` and `todowrite` by throwing an error in `tool.execute.before`.
+3. Block native `todoread` and `todowrite` by supplying custom implementations that return the reminder string directly.
 4. Leave normal `task` execution alone.
-5. On blocked todo calls after the full session guidance has already been shown, return only the short reminder.
+5. On overridden todo calls after the full session guidance has already been shown, return only the short reminder.
 
 ## Consequences
 
-- Blocked tools fail at the exact point they are called.
+- Blocked tools return gracefully instead of throwing hard errors, preventing the OpenCode agent loop from aborting.
 - The plugin does not depend on any custom Beads-specific agent type.
 - Normal subagent execution through `task` keeps working.
 - The model gets Beads guidance before each command, not only after a blocked todo call.

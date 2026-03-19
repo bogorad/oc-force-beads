@@ -30,28 +30,32 @@ const pluginInput = {
   $: {} as never,
 };
 
-async function runBeforeHook(input: {
+async function runTool(input: {
   tool: string;
   sessionID: string;
-  args: unknown;
-}): Promise<void> {
+  args: any;
+}): Promise<string | undefined> {
   const hooks = await ForceBeadsPlugin(pluginInput);
-  const beforeHook = hooks["tool.execute.before"];
-
-  if (!beforeHook) {
-    throw new Error("Missing tool.execute.before hook");
+  
+  if (!hooks.tool || !hooks.tool[input.tool]) {
+    return undefined;
   }
 
-  await beforeHook(
-    {
-      tool: input.tool,
-      sessionID: input.sessionID,
-      callID: `${input.sessionID}-${input.tool}`,
-    },
-    {
-      args: input.args,
-    },
-  );
+  const toolObj = hooks.tool[input.tool];
+  if (!toolObj) {
+    return undefined;
+  }
+
+  return toolObj.execute(input.args, {
+    sessionID: input.sessionID,
+    messageID: `${input.sessionID}-message`,
+    agent: "general",
+    directory: "/tmp",
+    worktree: "/tmp",
+    abort: new AbortController().signal,
+    metadata: () => {},
+    ask: async () => {},
+  });
 }
 
 async function runCommandBeforeHook(input: {
@@ -98,19 +102,13 @@ async function runCommandBeforeHook(input: {
 async function getErrorMessage(input: {
   tool: string;
   sessionID: string;
-  args: unknown;
+  args: any;
 }): Promise<string> {
-  try {
-    await runBeforeHook(input);
-  } catch (error) {
-    if (error instanceof Error) {
-      return error.message;
-    }
-
-    throw error;
+  const result = await runTool(input);
+  if (result === undefined) {
+    throw new Error("Tool did not return a value");
   }
-
-  throw new Error("Expected hook to throw");
+  return result;
 }
 
 test("first blocked todo call returns a short prefix plus the full Beads policy", async () => {
@@ -143,7 +141,7 @@ test("later blocked calls in the same session return the short reminder", async 
 
 test("task calls are not blocked", async () => {
   await expect(
-    runBeforeHook({
+    runTool({
       tool: "task",
       sessionID: "smoke-task-pass-through",
       args: {
