@@ -8,3 +8,6 @@ plugin-test.log
 .dolt/
 *.db
 
+
+# Beads / Dolt files (added by bd init)
+.beads-credential-key

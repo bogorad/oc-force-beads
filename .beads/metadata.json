@@ -2,6 +2,9 @@
   "database": "dolt",
   "backend": "dolt",
   "dolt_mode": "server",
+  "dolt_server_host": "doltsrv.lan",
+  "dolt_server_port": 3307,
+  "dolt_server_user": "root",
   "dolt_database": "oc_force_beads",
-  "project_id": "10cf55f9-cf8b-4070-8c73-08ad661f8df7"
+  "project_id": "573f9a91-6fca-4275-9c23-2cc482497ac3"
 }
