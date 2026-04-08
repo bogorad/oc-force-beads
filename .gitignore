@@ -11,3 +11,6 @@ plugin-test.log
 
 # Beads / Dolt files (added by bd init)
 .beads-credential-key
+.beads/dolt-config.log
+tmp/
+.tmp/
